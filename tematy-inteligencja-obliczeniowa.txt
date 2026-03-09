@@ -1,0 +1,36 @@
+GA do selekcji cech (feature selection)
+
+Opis: Osobnik = wektor binarny oznaczający, które cechy są wybrane do modelu ML.
+
+Heurystyki:
+
+mutacje typu flip bit, crossover typu uniform,
+
+lokalne poprawki: dodanie/usunięcie najlepiej rokujących cech,
+
+hybrydy GA + hill-climbing dla poprawy najlepszych osobników.
+
+Efekty: porównanie jakości klasyfikatora (np. SVM, MLP) przy wybranych cechach vs. wszystkie cechy.
+
+
+2. Vehicle Routing Problem (VRP)
+
+Opis: Generalizacja TSP: zamiast jednego komiwojażera mamy flotę pojazdów. Każdy pojazd musi odwiedzić podzbiór klientów, minimalizując łączny koszt tras.
+
+Dodatkowe ograniczenia: pojemność pojazdów (CVRP), okna czasowe (VRPTW), różne koszty dla tras.
+
+Dlaczego GA fajnie działa:
+
+Osobnik = permutacja klientów + podział na pojazdy.
+
+Duża przestrzeń rozwiązań → crossover i mutacje permutacyjne działają naturalnie.
+
+Można eksperymentować z lokalnym search (2-opt, 3-opt) w połączeniu z GA.
+
+3. Algorytm immunologiczny (clonal selection) do klasyfikacji 
+
+Implementacja algorytmu klonalnej selekcji (CLONALG) jako klasyfikatora i porównanie z innymi klasyfikatorami, np. k-NN oraz SVM na zbiorach UCI.
+
+wykrywanie anomali, fraud detection
+
+4. Optymalizacja selekcji danych treningowych (subset selection) dla CNN.  Osobnik koduje podzbiór treningowy (np. w formie binarnego wektora lub współczynników ważenia próbek). Metaheurystyka stara się znaleźć podzbiór danych, na którym trenowana CNN osiąga maksymalną accuracy przy ograniczonym budżecie (np. 20–30% danych). 
