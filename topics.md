@@ -10,4 +10,9 @@ Temat polega na implementacji algorytmu immunologicznego opartego na mechanizmie
 4. Optymalizacja selekcji danych treningowych (Subset Selection) dla CNN
 Temat dotyczy optymalizacji wyboru próbek treningowych dla sieci konwolucyjnych (CNN) przy użyciu metaheurystyki. Osobnik reprezentuje podzbiór danych treningowych, zakodowany na przykład w postaci wektora binarnego określającego wybór próbek lub współczynników ważenia przypisanych poszczególnym przykładom. Algorytm stara się znaleźć taki podzbiór danych, na którym trenowana sieć CNN osiąga możliwie najwyższą accuracy przy ograniczonym budżecie danych treningowych, np. wykorzystując jedynie 20–30% całego zbioru. Celem jest uzyskanie porównywalnej jakości modelu przy znacznie mniejszej liczbie danych treningowych.
 
-5. Metaheurystyczny wybór strategii augmentacji danych dla CNN. Genotyp koduje kombinacje augmentacji (rotacja, flip, crop, kolor, cutout, mixup, itp.) i ich intensywność. Algorytmy np. PSO lub GA, CNN trenuje się krótko (np. 5–10 epok) dla każdej konfiguracji augmentacji. Cel to znaleźć politykę augmentacji poprawiającą generalizację w stosunku do standardowego „pakietu” z torchvision. https://arxiv.org/html/2506.00377v3 
+5. Metaheurystyczny wybór strategii augmentacji danych dla CNN. Genotyp koduje kombinacje augmentacji (rotacja, flip, crop, kolor, cutout, mixup, itp.) i ich intensywność. Algorytmy np. PSO lub GA, CNN trenuje się krótko (np. 5–10 epok) dla każdej konfiguracji augmentacji. Cel to znaleźć politykę augmentacji poprawiającą generalizację w stosunku do standardowego „pakietu” z torchvision. https://arxiv.org/html/2506.00377v3
+
+Algorytm immunologiczny (Clonal Selection) do klasyfikacji
+Temat polega na implementacji algorytmu immunologicznego opartego na mechanizmie klonalnej selekcji (CLONALG) w roli klasyfikatora.
+Następnie jego skuteczność może zostać porównana z innymi metodami klasyfikacji, takimi jak k-NN oraz SVM, na zbiorach danych z repozytorium UCI.
+W ramach eksperymentów analizowana jest jakość klasyfikacji oraz możliwość zastosowania tego podejścia w zadaniach takich jak wykrywanie anomalii czy fraud detection.
