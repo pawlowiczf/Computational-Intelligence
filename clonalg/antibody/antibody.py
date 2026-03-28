@@ -19,7 +19,7 @@ class Antibody(ABC):
         ...
 
     @abstractmethod
-    def distance(self, other: 'Antibody') -> float:
+    def distance(self, other: np.ndarray) -> float:
         "Compute a distance (similarity metric) between this antibody and another"
         ...
 #

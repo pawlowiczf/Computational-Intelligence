@@ -1,4 +1,4 @@
-from antibody import Antibody
+from antibody.antibody import Antibody
 
 import numpy as np
 from typing import Callable
@@ -26,23 +26,29 @@ class RealAntibody(Antibody):
 
         return (
             RealAntibodyBuilder()
-            .with_genes(self.genes)
-            .with_bounds(self.bounds)
+            .with_genes(self.genes.copy())
+            .with_bounds(self.bounds.copy())
             .with_distance_fn(self.distance_fn)
             .build()
         )
 
-    def mutation(self, rate) -> 'Antibody':
+    def mutation(self, rate: float) -> 'Antibody':
         "Apply mutation with a given rate and return a new mutated antibody"
-
         clone = self.clone()
-        mask = np.random.rand(len(clone.genes)) < rate
-        clone.genes ^= mask  # bitflip
+        sigma = rate * (np.array([b[1]-b[0] for b in self.bounds]))
+        clone.genes += np.random.normal(0, sigma)
+
+        for i, (lo, hi) in enumerate(self.bounds):
+            clone.genes[i] = np.clip(clone.genes[i], lo, hi)
         return clone
 
-    def distance(self, other: 'Antibody') -> float:
+    def distance(self, other: np.ndarray) -> float:
         "Compute a distance (similarity metric) between this antibody and another"
-        return self.distance_fn(self.genes, other.genes)
+        return self.distance_fn(self.genes, other)
+
+    @staticmethod
+    def builder() -> 'RealAntibodyBuilder':
+        return RealAntibodyBuilder()
 #
 
 class RealAntibodyBuilder():
