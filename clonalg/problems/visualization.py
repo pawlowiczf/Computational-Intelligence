@@ -78,7 +78,7 @@ def plot_contour_and_paths(
                 x=path[:, 0],
                 y=path[:, 1],
                 mode="lines+markers",
-                marker=dict(size=4),
+                marker=dict(size=5),
                 line=dict(width=2, color=colors[color_idx]),
                 name=f"Run {idx+1}",
                 showlegend=True,

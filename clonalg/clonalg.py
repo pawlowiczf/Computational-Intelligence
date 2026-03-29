@@ -27,7 +27,7 @@ class CLONALG:
         ]
     #
 
-    def _select_and_clone(self, antigen: np.ndarray) -> list[Antibody]:
+    def _select_and_clone(self) -> list[Antibody]:
         "Clone the n best individuals proportionally to affinity rank"
         clones = []
         for i, antibody in enumerate(self.population[:self.n_select]):

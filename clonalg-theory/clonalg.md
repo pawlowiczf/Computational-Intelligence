@@ -5,6 +5,7 @@ Papers:
 https://link.springer.com/article/10.1007/s11390-005-0728-3
 https://www.sciencedirect.com/science/article/pii/S0304397510006559
 https://cleveralgorithms.com/nature-inspired/immune/clonal_selection_algorithm.html
+https://www.cs.unm.edu/~forrest/classes/immuno-class/readings/DeCastro.pdf <- kluczowa publikacja
 
 ### Biology
 
