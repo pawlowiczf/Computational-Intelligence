@@ -1,4 +1,4 @@
-from clonalg.clonalg import CLONALG
+from clonalg import CLONALG
 from antibody.antibody import Antibody
 import numpy as np
 
@@ -45,16 +45,16 @@ class CLONALGClassifier:
         return [self.predict(x) for x in X]
 #
 
-classifier = CLONALGClassifier(
-    n_classes=3,
-    population_size=50,
-    clone_factor=0.1,
-    n_select=10,
-    n_replace=5,
-    n_generations=20,
-    memory_size=10,
-    antibody_factory=lambda: Antibody.random(n_features=4),
-)
+# classifier = CLONALGClassifier(
+#     n_classes=3,
+#     population_size=50,
+#     clone_factor=0.1,
+#     n_select=10,
+#     n_replace=5,
+#     n_generations=20,
+#     memory_size=10,
+#     antibody_factory=lambda: Antibody.random(n_features=4),
+# )
 
-classifier.fit(X_train, y_train)
-predictions = classifier.predict_batch(X_test)
+# classifier.fit(X_train, y_train)
+# predictions = classifier.predict_batch(X_test)

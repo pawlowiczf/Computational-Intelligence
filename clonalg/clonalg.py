@@ -12,6 +12,8 @@ class CLONALG:
         n_generations: int,
         memory_size: int,           # |M| - number of memory cells
         antibody_factory: Callable[[], Antibody],
+        p: float = 5.0,             # p - exponent for mutation rate
+        verbose: bool = False,
     ):
         self.population_size = population_size
         self.clone_factor = clone_factor
@@ -20,6 +22,8 @@ class CLONALG:
         self.n_generations = n_generations
         self.memory_size = memory_size
         self.antibody_factory = antibody_factory
+        self.p = p
+        self.verbose = verbose
 
         self.memory: list[Antibody] = []  # M - memory cells
         self.population: list[Antibody] = [
@@ -36,25 +40,45 @@ class CLONALG:
         return clones
 
     def _hypermutate(self, clones: list[Antibody], antigen: np.ndarray) -> list[Antibody]:
-        "Mutate clones - rate inversely proportional to affinity"
+        "Mutate clones - rate exponentially decreasing with affinity"
+        if not clones: return []
+        
+        affs = np.array([c.affinity(antigen) for c in clones])
+        f_min, f_max = affs.min(), affs.max()
+        
+        # Normalize affinities to [0, 1]
+        if f_max == f_min:
+            f_norm = np.ones_like(affs)
+        else:
+            f_norm = (affs - f_min) / (f_max - f_min)
+
         mutated = []
-        for clone in clones:
-            affinity = clone.affinity(antigen)
-            rate = 1.0 - affinity  # higher affinity → lower mutation rate
+        for i, clone in enumerate(clones):
+            rate = np.exp(-self.p * f_norm[i])
             mutated.append(clone.mutation(rate))
         return mutated
 
     def _update_memory(self, matured: list[Antibody], antigen: np.ndarray):
-        "Update memory set with best matured clones"
-        candidates = self.memory + matured
-        candidates.sort(key=lambda ab: ab.affinity(antigen), reverse=True)
-        self.memory = candidates[:self.memory_size]
+        "Update memory set with best matured clone vs respective memory cell"
+        best_matured = max(matured, key=lambda ab: ab.affinity(antigen))
+        
+        if not self.memory:
+            self.memory.append(best_matured)
+            return
 
-    def _replace_weakest(self):
+        distances = [best_matured.distance(m.genes) for m in self.memory]
+        idx = np.argmin(distances) # respective Ab index in memory
+        
+        if best_matured.affinity(antigen) > self.memory[idx].affinity(antigen):
+            self.memory[idx] = best_matured
+        elif len(self.memory) < self.memory_size:
+            self.memory.append(best_matured)
+
+    def _replace_weakest(self, antigen: np.ndarray):
         "Replace the n_replace weakest antibodies with new random ones"
-        self.population[-self.n_replace:] = [
-            self.antibody_factory() for _ in range(self.n_replace)
-        ]
+        self.population.sort(key=lambda ab: ab.affinity(antigen), reverse=True)
+        
+        self.population[-self.n_replace:] = [self.antibody_factory() for _ in range(self.n_replace)]
 
     def run(self, antigens: list[np.ndarray]) -> list[Antibody]:
         for gen in range(self.n_generations):
@@ -67,7 +91,7 @@ class CLONALG:
                 self.population = self.population[:self.population_size]
 
                 # 3. Clone n best proportionally to rank
-                clones = self._select_and_clone(antigen)
+                clones = self._select_and_clone()
 
                 # 4. Hypermutate clones
                 matured = self._hypermutate(clones, antigen)
@@ -76,8 +100,10 @@ class CLONALG:
                 self._update_memory(matured, antigen)
 
                 # 6. Replace weakest with random antibodies
-                self._replace_weakest()
+                self._replace_weakest(antigen)
 
+            if self.verbose:
+                print(f"Generation {gen + 1}/{self.n_generations} completed. Memory best affinity: {max(ab.affinity(antigen) for ab in self.memory):.4f}")
         return self.memory if self.memory else self.population
     #
 #

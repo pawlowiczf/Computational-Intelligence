@@ -28,6 +28,8 @@ clonalg = CLONALG(
     n_replace=3,
     n_generations=1000,
     antibody_factory=factory,
+    n_select=10,
+    memory_size=5,
 )
 
 population = clonalg.run(antigens=antigens)

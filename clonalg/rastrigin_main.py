@@ -31,12 +31,13 @@ def factory() -> RealAntibody:
 
 clonalg = CLONALG(
     population_size=50,
-    clone_factor=0.2,       # beta — n_clones = ceil(beta * N / rank)
+    clone_factor=0.5,       # beta — n_clones = ceil(beta * N / rank)
     n_select=10,            # clone 10 best individuals each generation
-    n_replace=5,            # replace 5 weakest each generation
+    n_replace=15,            # replace 5 weakest each generation
     n_generations=200,
     memory_size=20,         # keep 10 best solutions in memory
     antibody_factory=factory,
+    p=5.0                   # rho — controls mutation rate (higher = more focused search)
 )
 
 memory = clonalg.run(antigens=[np.zeros(n_dims)])  # antigen ignored
