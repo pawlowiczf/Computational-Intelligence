@@ -2,6 +2,9 @@ import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import numpy as np
 
+import plotly.io as pio
+pio.renderers.default = "browser"
+
 from problems.problem import Problem
 
 def prepare_mesh_grid(
@@ -24,6 +27,7 @@ def prepare_mesh_grid(
 
 def plot_3d_surface(
     problem: Problem,
+    title = None,
     grid_size: int = 50,
 ):
     X, Y, Z, _, _ = prepare_mesh_grid(problem=problem, grid_size=grid_size)
@@ -32,7 +36,10 @@ def plot_3d_surface(
     ax = fig.add_subplot(111, projection="3d")
     surf = ax.plot_surface(X, Y, Z, cmap="viridis", edgecolor="none")
 
-    ax.set_title(problem.__class__.__name__)
+    # if title is not None:
+    #     ax.set_title(title)
+    # else:
+    #     ax.set_title(problem.__class__.__name__)
     ax.set_xlabel("x")
     ax.set_ylabel("y")
     ax.set_zlabel("f(x, y)")
@@ -80,14 +87,14 @@ def plot_contour_and_paths(
                 mode="lines+markers",
                 marker=dict(size=5),
                 line=dict(width=2, color=colors[color_idx]),
-                name=f"Run {idx+1}",
-                showlegend=True,
+                # name=f"Run {idx+1}"
+                showlegend=False
             )
         )
 
     fig.update_layout(
-        title=title, xaxis_title="x", yaxis_title="y", width=800, height=700,
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        title=title, xaxis_title="x", yaxis_title="y", width=800, height=700
+        # legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     )
 
     fig.show()
