@@ -34,8 +34,8 @@ clonalg = CLONALG(
     clone_factor=0.2,       # beta — n_clones = ceil(beta * N / rank)
     n_select=10,            # clone 10 best individuals each generation
     n_replace=5,            # replace 5 weakest each generation
-    n_generations=200,
-    memory_size=20,         # keep 10 best solutions in memory
+    n_generations=300,
+    memory_size=30,         # keep 10 best solutions in memory
     antibody_factory=factory,
 )
 
@@ -46,7 +46,7 @@ dummy = np.zeros(n_dims)
 memory.sort(key=lambda ab: ab.affinity(dummy), reverse=True)
 best = memory[0]
 
-paths = list(map(lambda x: np.array(x.genes).reshape(1, 2), memory[:20]))
+paths = list(map(lambda x: np.array(x.genes).reshape(1, 2), memory))
 print(len(paths))
 
 print(f"Best solution: x = {best.genes}")
