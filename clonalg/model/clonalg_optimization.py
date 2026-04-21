@@ -1,3 +1,5 @@
+import numpy as np
+
 from antibody.antibody import Antibody
 from typing import Callable
 
@@ -9,12 +11,14 @@ class OptimizationClonalg:
         n_replace: int,         # d - how many weakest to replace with random
         n_generations: int,
         antibody_factory: Callable[[], Antibody],
+        rho: float = 1.0,       # decay rate: alpha = exp(-rho * f)
     ):
         self.population_size = population_size
         self.clone_factor = clone_factor
         self.n_replace = n_replace
         self.n_generations = n_generations
         self.antibody_factory = antibody_factory
+        self.rho = rho
 
         self.population: list[Antibody] = [
             antibody_factory() for _ in range(population_size)
@@ -28,7 +32,7 @@ class OptimizationClonalg:
             matured = []
             for clone in [parent.clone() for _ in range(n_clones)]:
                 affinity = clone.affinity(None)
-                rate = 1.0 - affinity
+                rate = np.exp(-self.rho * affinity)
                 matured.append(clone.mutation(rate))
             clone_groups.append(matured)
         return clone_groups

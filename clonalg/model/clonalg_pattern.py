@@ -12,6 +12,7 @@ class PatternClonalg:
         n_generations: int,
         memory_size: int,           # |M| - number of memory cells
         antibody_factory: Callable[[], Antibody],
+        rho: float = 1.0,           # decay rate: alpha = exp(-rho * f)
     ):
         self.population_size = population_size
         self.clone_factor = clone_factor
@@ -20,6 +21,7 @@ class PatternClonalg:
         self.n_generations = n_generations
         self.memory_size = memory_size
         self.antibody_factory = antibody_factory
+        self.rho = rho
 
         self.memory: list[Antibody] = []        # Ab_m - memory cells
         self.population: list[Antibody] = [     # Ab_r - remainder
@@ -45,7 +47,7 @@ class PatternClonalg:
             matured = []
             for clone in [parent.clone() for _ in range(n_clones)]:
                 affinity = clone.affinity(antigen)
-                rate = 1.0 - affinity  # higher affinity → lower mutation rate
+                rate = np.exp(-self.rho * affinity)
                 matured.append(clone.mutation(rate))
 
             clone_groups.append(matured)
