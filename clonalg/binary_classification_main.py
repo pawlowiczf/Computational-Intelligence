@@ -1,6 +1,6 @@
 import numpy as np
 from antibody.binary_antibody import BinaryAntibody, BinaryAntibodyBuilder
-from model.clonalg import CLONALG
+from clonalg.model.clonalg_pattern import CLONALG
 
 # --- antigens: binary patterns to recognize ---
 antigens = [
