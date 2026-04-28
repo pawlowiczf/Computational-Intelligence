@@ -1,4 +1,4 @@
-from antibody.antibody import Antibody
+from clonalg.antibody.antibody import Antibody
 
 import numpy as np
 from typing import Callable

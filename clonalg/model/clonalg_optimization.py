@@ -1,6 +1,6 @@
 import numpy as np
 
-from antibody.antibody import Antibody
+from clonalg.antibody.antibody import Antibody
 from typing import Callable
 
 class OptimizationClonalg:

@@ -1,6 +1,7 @@
 import numpy as np
-from antibody.binary_antibody import BinaryAntibody, BinaryAntibodyBuilder
-from clonalg.model.clonalg_pattern import CLONALG
+
+from clonalg.antibody.binary_antibody import BinaryAntibody, BinaryAntibodyBuilder
+from clonalg.model.clonalg_pattern import PatternClonalg
 
 # --- antigens: binary patterns to recognize ---
 antigens = [
@@ -22,11 +23,13 @@ def factory() -> BinaryAntibody:
     )
 
 # --- run CLONALG ---
-clonalg = CLONALG(
+clonalg = PatternClonalg(
     population_size=30,
     clone_factor=0.3,
+    n_select=10,
     n_replace=3,
     n_generations=1000,
+    memory_size=10,
     antibody_factory=factory,
 )
 

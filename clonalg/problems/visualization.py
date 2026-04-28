@@ -1,11 +1,12 @@
+import os
+import tempfile
+import webbrowser
+
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import numpy as np
 
-import plotly.io as pio
-pio.renderers.default = "browser"
-
-from problems.problem import Problem
+from clonalg.problems.problem import Problem
 
 def prepare_mesh_grid(
     problem: Problem,
