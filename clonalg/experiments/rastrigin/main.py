@@ -23,7 +23,7 @@ clonalg = OptimizationClonalg(
     population_size=20,
     clone_factor=0.2,       # beta — n_clones = ceil(beta * N / rank)
     n_replace=5,            # replace 5 weakest each generation
-    n_generations=250,
+    n_generations=10000,
     antibody_factory=factory,
 )
 

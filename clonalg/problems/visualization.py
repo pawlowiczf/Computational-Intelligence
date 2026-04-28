@@ -1,16 +1,15 @@
-import os
-import tempfile
-import webbrowser
-
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import numpy as np
+
+# import plotly.io as pio
+# pio.renderers.default = "browser"
 
 from clonalg.problems.problem import Problem
 
 def prepare_mesh_grid(
     problem: Problem,
-    bounds: tuple[float, float] = (-5.0, 5.0),
+    bounds: tuple[float, float] = (-5.5, 5.5),
     grid_size: int = 50,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     x_vals = np.linspace(bounds[0], bounds[1], grid_size)
