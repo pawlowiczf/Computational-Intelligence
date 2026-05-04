@@ -4,8 +4,8 @@ import numpy as np
 class Antibody(ABC):
 
     @abstractmethod
-    def affinity(self, antigen: np.ndarray) -> float:
-        "Compute the affinity between this antibody and a given antigen"
+    def affinity(self, antigen: np.ndarray = None) -> float:
+        "Compute the affinity between this antibody and a given antigen (or via cost_fn in optimization mode)"
         ...
 
     @abstractmethod

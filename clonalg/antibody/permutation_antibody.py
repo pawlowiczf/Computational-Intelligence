@@ -3,7 +3,7 @@ from clonalg.antibody.antibody import Antibody
 import numpy as np
 from typing import Callable
 
-class BinaryAntibody(Antibody):
+class PermutationAntibody(Antibody):
     def __init__(
         self,
         genes: np.ndarray,
@@ -16,16 +16,15 @@ class BinaryAntibody(Antibody):
     #
 
     def affinity(self, antigen: np.ndarray = None) -> float:
-        "Compute the affinity. Uses cost_fn (optimization mode) if set, else Hamming-based recognition score."
+        "Compute the affinity. Uses cost_fn (optimization mode) if set, else distance to antigen."
         if self.cost_fn is not None:
             return 1.0 / (1.0 + self.cost_fn(self.genes))
-        n = len(self.genes)
-        return 1.0 - self.distance(antigen) / n  # ∈ [0, 1]
+        return 1.0 / (1.0 + self.distance(antigen))
 
     def clone(self) -> 'Antibody':
         "Create and return a copy (clone) of this antibody"
         return (
-            BinaryAntibodyBuilder()
+            PermutationAntibodyBuilder()
             .with_genes(self.genes.copy())
             .with_distance_fn(self.distance_fn)
             .with_cost_fn(self.cost_fn)
@@ -35,8 +34,11 @@ class BinaryAntibody(Antibody):
     def mutation(self, rate: float) -> 'Antibody':
         "Apply mutation with a given rate and return a new mutated antibody"
         clone = self.clone()
-        mask = np.random.rand(len(clone.genes)) < rate
-        clone.genes ^= mask  # bitflip
+        n = len(clone.genes)
+        n_ops = max(1, int(rate * n))
+        for _ in range(n_ops):
+            i, j = sorted(np.random.choice(n, 2, replace=False))
+            clone.genes[i:j+1] = clone.genes[i:j+1][::-1]  # 2-opt reverse
         return clone
 
     def distance(self, other: np.ndarray) -> float:
@@ -44,33 +46,34 @@ class BinaryAntibody(Antibody):
         return self.distance_fn(self.genes, other)
 
     @staticmethod
-    def builder() -> 'BinaryAntibodyBuilder':
-        return BinaryAntibodyBuilder()
+    def builder() -> 'PermutationAntibodyBuilder':
+        return PermutationAntibodyBuilder()
 #
 
-class BinaryAntibodyBuilder:
+class PermutationAntibodyBuilder():
     def __init__(self):
         self._genes = None
         self._distance_fn: Callable[[np.ndarray, np.ndarray], float] = lambda a, b: np.sum(a != b)
         self._cost_fn: Callable[[np.ndarray], float] = None
     #
 
-    def with_genes(self, genes: np.ndarray) -> 'BinaryAntibodyBuilder':
+    def with_genes(self, genes: np.ndarray) -> 'PermutationAntibodyBuilder':
         self._genes = genes
         return self
 
-    def with_distance_fn(self, distance_fn: Callable[[np.ndarray, np.ndarray], float]) -> 'BinaryAntibodyBuilder':
+    def with_distance_fn(self, distance_fn: Callable[[np.ndarray, np.ndarray], float]) -> 'PermutationAntibodyBuilder':
         self._distance_fn = distance_fn
         return self
 
-    def with_cost_fn(self, cost_fn: Callable[[np.ndarray], float]) -> 'BinaryAntibodyBuilder':
+    def with_cost_fn(self, cost_fn: Callable[[np.ndarray], float]) -> 'PermutationAntibodyBuilder':
         self._cost_fn = cost_fn
         return self
 
-    def build(self) -> 'BinaryAntibody':
+    def build(self):
         if self._genes is None:
-            raise ValueError("Genes must be set before building BinaryAntibody")
-        return BinaryAntibody(
+            raise ValueError("Genes must be set before building PermutationAntibody")
+
+        return PermutationAntibody(
             genes=self._genes,
             distance_fn=self._distance_fn,
             cost_fn=self._cost_fn,

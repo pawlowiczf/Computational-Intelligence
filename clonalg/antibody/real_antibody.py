@@ -8,18 +8,21 @@ class RealAntibody(Antibody):
         self,
         genes: np.ndarray,
         bounds: list[tuple],
-
-        distance_fn: Callable[[np.ndarray, np.ndarray], float]
+        distance_fn: Callable[[np.ndarray, np.ndarray], float],
+        cost_fn: Callable[[np.ndarray], float] = None,
     ):
         self.genes = genes
         self.bounds = bounds
-
         self.distance_fn = distance_fn
+        self.cost_fn = cost_fn
     #
 
-    def affinity(self, antigen: np.ndarray) -> float:
-        "Compute the affinity between this antibody and a given antigen"
+    def affinity(self, antigen: np.ndarray = None) -> float:
+        "Compute the affinity. Uses cost_fn (optimization mode) if set, else distance to antigen (recognition mode)."
+        if self.cost_fn is not None:
+            return 1.0 / (1.0 + self.cost_fn(self.genes))
         return 1.0 / (1.0 + self.distance(antigen))
+
 
     def clone(self) -> 'Antibody':
         "Create and return a copy (clone) of this antibody"
@@ -29,6 +32,7 @@ class RealAntibody(Antibody):
             .with_genes(self.genes.copy())
             .with_bounds(self.bounds.copy())
             .with_distance_fn(self.distance_fn)
+            .with_cost_fn(self.cost_fn)
             .build()
         )
 
@@ -55,8 +59,8 @@ class RealAntibodyBuilder():
     def __init__(self):
         self._genes = None
         self._bounds: list[tuple] = None
-
         self._distance_fn: Callable[[np.ndarray, np.ndarray], float] = lambda a, b: np.linalg.norm(a - b)
+        self._cost_fn: Callable[[np.ndarray], float] = None
     #
 
     def with_genes(self, genes: np.ndarray) -> 'RealAntibodyBuilder':
@@ -71,6 +75,10 @@ class RealAntibodyBuilder():
         self._bounds = bounds
         return self
 
+    def with_cost_fn(self, cost_fn: Callable[[np.ndarray], float]) -> 'RealAntibodyBuilder':
+        self._cost_fn = cost_fn
+        return self
+
     def build(self):
         if self._genes is None:
             raise ValueError("Genes must be set before building RealAntibody")
@@ -81,5 +89,10 @@ class RealAntibodyBuilder():
             if not(self._bounds[i][0] <= gene <= self._bounds[i][1]):
                 raise ValueError(f"Gene at index {i} = {gene} is out of bounds {self._bounds[i]}")
 
-        return RealAntibody(genes=self._genes, bounds=self._bounds, distance_fn=self._distance_fn)
+        return RealAntibody(
+            genes=self._genes,
+            bounds=self._bounds,
+            distance_fn=self._distance_fn,
+            cost_fn=self._cost_fn,
+        )
 #

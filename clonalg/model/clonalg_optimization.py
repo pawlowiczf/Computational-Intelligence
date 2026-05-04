@@ -14,12 +14,13 @@ In a optimization version of Clonalg algorithm, there are a few differences:
 class OptimizationClonalg:
     def __init__(
         self,
-        population_size: int,   # N - whole population is memory (no separate Ab_m)
-        clone_factor: float,    # beta - clone multiplier
-        n_replace: int,         # d - how many weakest to replace with random
+        population_size: int,           # N - whole population is memory (no separate Ab_m)
+        clone_factor: float,            # beta - clone multiplier
+        n_replace: int,                 # d - how many weakest to replace with random
         n_generations: int,
         antibody_factory: Callable[[], Antibody],
-        rho: float = 1.0,       # decay rate: alpha = exp(-rho * f)
+        rho: float = 1.0,               # decay rate: alpha = exp(-rho * f)
+        suppression_threshold: float = 0.1,  # sigma_s - min distance between survivors (in the metric defined by Antibody.distance)
     ):
         self.population_size = population_size
         self.clone_factor = clone_factor
@@ -27,6 +28,7 @@ class OptimizationClonalg:
         self.n_generations = n_generations
         self.antibody_factory = antibody_factory
         self.rho = rho
+        self.suppression_threshold = suppression_threshold
 
         self.population: list[Antibody] = [
             antibody_factory() for _ in range(population_size)
@@ -52,7 +54,7 @@ class OptimizationClonalg:
             clone_groups.append(matured)
         return clone_groups
 
-    @deprecated
+    @deprecated("Use another method instead")
     def _replace_weakest(self):
         # Population must be sorted descending before calling this
         self.population[-self.n_replace:] = [
@@ -70,14 +72,18 @@ class OptimizationClonalg:
         same niche. Suppressed slots are replaced with random antibodies to
         encourage continued exploration of the search space.
 
+        Distance is computed via `Antibody.distance`, so the metric is
+        defined by the concrete antibody type (Euclidean for real-valued,
+        Hamming for binary/permutation, etc.).
+
         Args:
             sigma_s:
-                Suppression threshold - minimum Euclidean distance
-                required between any two survivors.
+                Suppression threshold - minimum distance (in the antibody's
+                own metric) required between any two survivors.
         """
         survivors = []
         for ab in sorted(self.population, key=lambda x: -x.affinity(None)):
-            if all(np.linalg.norm(ab.genes - s.genes) >= sigma_s for s in survivors):
+            if all(ab.distance(s.genes) >= sigma_s for s in survivors):
                 survivors.append(ab)
         while len(survivors) < self.population_size:
             survivors.append(self.antibody_factory())
@@ -107,6 +113,6 @@ class OptimizationClonalg:
 
             # Apply suppression niching to remove redundant Ab's occupying
             # the same niche, then refill vacated slots with new random Ab's
-            self._suppress_and_refill(0.1)
+            self._suppress_and_refill(self.suppression_threshold)
 
         return self.population
