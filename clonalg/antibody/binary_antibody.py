@@ -3,6 +3,7 @@ from clonalg.antibody.antibody import Antibody
 import numpy as np
 from typing import Callable
 
+
 class BinaryAntibody(Antibody):
     def __init__(
         self,
@@ -13,6 +14,7 @@ class BinaryAntibody(Antibody):
         self.genes = genes
         self.distance_fn = distance_fn
         self.cost_fn = cost_fn
+
     #
 
     def affinity(self, antigen: np.ndarray = None) -> float:
@@ -22,7 +24,7 @@ class BinaryAntibody(Antibody):
         n = len(self.genes)
         return 1.0 - self.distance(antigen) / n  # ∈ [0, 1]
 
-    def clone(self) -> 'Antibody':
+    def clone(self) -> "Antibody":
         "Create and return a copy (clone) of this antibody"
         return (
             BinaryAntibodyBuilder()
@@ -32,7 +34,7 @@ class BinaryAntibody(Antibody):
             .build()
         )
 
-    def mutation(self, rate: float) -> 'Antibody':
+    def mutation(self, rate: float) -> "Antibody":
         "Apply mutation with a given rate and return a new mutated antibody"
         clone = self.clone()
         mask = np.random.rand(len(clone.genes)) < rate
@@ -44,30 +46,40 @@ class BinaryAntibody(Antibody):
         return self.distance_fn(self.genes, other)
 
     @staticmethod
-    def builder() -> 'BinaryAntibodyBuilder':
+    def builder() -> "BinaryAntibodyBuilder":
         return BinaryAntibodyBuilder()
+
+
 #
+
 
 class BinaryAntibodyBuilder:
     def __init__(self):
         self._genes = None
-        self._distance_fn: Callable[[np.ndarray, np.ndarray], float] = lambda a, b: np.sum(a != b)
+        self._distance_fn: Callable[[np.ndarray, np.ndarray], float] = lambda a, b: (
+            np.sum(a != b)
+        )
         self._cost_fn: Callable[[np.ndarray], float] = None
+
     #
 
-    def with_genes(self, genes: np.ndarray) -> 'BinaryAntibodyBuilder':
+    def with_genes(self, genes: np.ndarray) -> "BinaryAntibodyBuilder":
         self._genes = genes
         return self
 
-    def with_distance_fn(self, distance_fn: Callable[[np.ndarray, np.ndarray], float]) -> 'BinaryAntibodyBuilder':
+    def with_distance_fn(
+        self, distance_fn: Callable[[np.ndarray, np.ndarray], float]
+    ) -> "BinaryAntibodyBuilder":
         self._distance_fn = distance_fn
         return self
 
-    def with_cost_fn(self, cost_fn: Callable[[np.ndarray], float]) -> 'BinaryAntibodyBuilder':
+    def with_cost_fn(
+        self, cost_fn: Callable[[np.ndarray], float]
+    ) -> "BinaryAntibodyBuilder":
         self._cost_fn = cost_fn
         return self
 
-    def build(self) -> 'BinaryAntibody':
+    def build(self) -> "BinaryAntibody":
         if self._genes is None:
             raise ValueError("Genes must be set before building BinaryAntibody")
         return BinaryAntibody(
@@ -75,4 +87,6 @@ class BinaryAntibodyBuilder:
             distance_fn=self._distance_fn,
             cost_fn=self._cost_fn,
         )
+
+
 #

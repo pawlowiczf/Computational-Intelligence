@@ -3,6 +3,7 @@ from clonalg.antibody.antibody import Antibody
 import numpy as np
 from typing import Callable
 
+
 class PermutationAntibody(Antibody):
     def __init__(
         self,
@@ -13,6 +14,7 @@ class PermutationAntibody(Antibody):
         self.genes = genes
         self.distance_fn = distance_fn
         self.cost_fn = cost_fn
+
     #
 
     def affinity(self, antigen: np.ndarray = None) -> float:
@@ -21,7 +23,7 @@ class PermutationAntibody(Antibody):
             return 1.0 / (1.0 + self.cost_fn(self.genes))
         return 1.0 / (1.0 + self.distance(antigen))
 
-    def clone(self) -> 'Antibody':
+    def clone(self) -> "Antibody":
         "Create and return a copy (clone) of this antibody"
         return (
             PermutationAntibodyBuilder()
@@ -31,14 +33,14 @@ class PermutationAntibody(Antibody):
             .build()
         )
 
-    def mutation(self, rate: float) -> 'Antibody':
+    def mutation(self, rate: float) -> "Antibody":
         "Apply mutation with a given rate and return a new mutated antibody"
         clone = self.clone()
         n = len(clone.genes)
         n_ops = max(1, int(rate * n))
         for _ in range(n_ops):
             i, j = sorted(np.random.choice(n, 2, replace=False))
-            clone.genes[i:j+1] = clone.genes[i:j+1][::-1]  # 2-opt reverse
+            clone.genes[i : j + 1] = clone.genes[i : j + 1][::-1]  # 2-opt reverse
         return clone
 
     def distance(self, other: np.ndarray) -> float:
@@ -46,26 +48,36 @@ class PermutationAntibody(Antibody):
         return self.distance_fn(self.genes, other)
 
     @staticmethod
-    def builder() -> 'PermutationAntibodyBuilder':
+    def builder() -> "PermutationAntibodyBuilder":
         return PermutationAntibodyBuilder()
+
+
 #
 
-class PermutationAntibodyBuilder():
+
+class PermutationAntibodyBuilder:
     def __init__(self):
         self._genes = None
-        self._distance_fn: Callable[[np.ndarray, np.ndarray], float] = lambda a, b: np.sum(a != b)
+        self._distance_fn: Callable[[np.ndarray, np.ndarray], float] = lambda a, b: (
+            np.sum(a != b)
+        )
         self._cost_fn: Callable[[np.ndarray], float] = None
+
     #
 
-    def with_genes(self, genes: np.ndarray) -> 'PermutationAntibodyBuilder':
+    def with_genes(self, genes: np.ndarray) -> "PermutationAntibodyBuilder":
         self._genes = genes
         return self
 
-    def with_distance_fn(self, distance_fn: Callable[[np.ndarray, np.ndarray], float]) -> 'PermutationAntibodyBuilder':
+    def with_distance_fn(
+        self, distance_fn: Callable[[np.ndarray, np.ndarray], float]
+    ) -> "PermutationAntibodyBuilder":
         self._distance_fn = distance_fn
         return self
 
-    def with_cost_fn(self, cost_fn: Callable[[np.ndarray], float]) -> 'PermutationAntibodyBuilder':
+    def with_cost_fn(
+        self, cost_fn: Callable[[np.ndarray], float]
+    ) -> "PermutationAntibodyBuilder":
         self._cost_fn = cost_fn
         return self
 
@@ -78,4 +90,6 @@ class PermutationAntibodyBuilder():
             distance_fn=self._distance_fn,
             cost_fn=self._cost_fn,
         )
+
+
 #

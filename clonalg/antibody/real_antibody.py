@@ -3,6 +3,7 @@ from clonalg.antibody.antibody import Antibody
 import numpy as np
 from typing import Callable
 
+
 class RealAntibody(Antibody):
     def __init__(
         self,
@@ -15,6 +16,7 @@ class RealAntibody(Antibody):
         self.bounds = bounds
         self.distance_fn = distance_fn
         self.cost_fn = cost_fn
+
     #
 
     def affinity(self, antigen: np.ndarray = None) -> float:
@@ -23,8 +25,7 @@ class RealAntibody(Antibody):
             return 1.0 / (1.0 + self.cost_fn(self.genes))
         return 1.0 / (1.0 + self.distance(antigen))
 
-
-    def clone(self) -> 'Antibody':
+    def clone(self) -> "Antibody":
         "Create and return a copy (clone) of this antibody"
 
         return (
@@ -36,10 +37,10 @@ class RealAntibody(Antibody):
             .build()
         )
 
-    def mutation(self, rate: float) -> 'Antibody':
+    def mutation(self, rate: float) -> "Antibody":
         "Apply mutation with a given rate and return a new mutated antibody"
         clone = self.clone()
-        sigma = rate * (np.array([b[1]-b[0] for b in self.bounds]))
+        sigma = rate * (np.array([b[1] - b[0] for b in self.bounds]))
         clone.genes += np.random.normal(0, sigma)
 
         for i, (lo, hi) in enumerate(self.bounds):
@@ -51,31 +52,41 @@ class RealAntibody(Antibody):
         return self.distance_fn(self.genes, other)
 
     @staticmethod
-    def builder() -> 'RealAntibodyBuilder':
+    def builder() -> "RealAntibodyBuilder":
         return RealAntibodyBuilder()
+
+
 #
 
-class RealAntibodyBuilder():
+
+class RealAntibodyBuilder:
     def __init__(self):
         self._genes = None
         self._bounds: list[tuple] = None
-        self._distance_fn: Callable[[np.ndarray, np.ndarray], float] = lambda a, b: np.linalg.norm(a - b)
+        self._distance_fn: Callable[[np.ndarray, np.ndarray], float] = lambda a, b: (
+            np.linalg.norm(a - b)
+        )
         self._cost_fn: Callable[[np.ndarray], float] = None
+
     #
 
-    def with_genes(self, genes: np.ndarray) -> 'RealAntibodyBuilder':
+    def with_genes(self, genes: np.ndarray) -> "RealAntibodyBuilder":
         self._genes = genes
         return self
 
-    def with_distance_fn(self, distance_fn: Callable[[np.ndarray, np.ndarray], float]) -> 'RealAntibodyBuilder':
+    def with_distance_fn(
+        self, distance_fn: Callable[[np.ndarray, np.ndarray], float]
+    ) -> "RealAntibodyBuilder":
         self._distance_fn = distance_fn
         return self
 
-    def with_bounds(self, bounds: list[tuple]) -> 'RealAntibodyBuilder':
+    def with_bounds(self, bounds: list[tuple]) -> "RealAntibodyBuilder":
         self._bounds = bounds
         return self
 
-    def with_cost_fn(self, cost_fn: Callable[[np.ndarray], float]) -> 'RealAntibodyBuilder':
+    def with_cost_fn(
+        self, cost_fn: Callable[[np.ndarray], float]
+    ) -> "RealAntibodyBuilder":
         self._cost_fn = cost_fn
         return self
 
@@ -86,8 +97,10 @@ class RealAntibodyBuilder():
             raise ValueError("Bounds must be set before building RealAntibody")
 
         for i, gene in enumerate(self._genes):
-            if not(self._bounds[i][0] <= gene <= self._bounds[i][1]):
-                raise ValueError(f"Gene at index {i} = {gene} is out of bounds {self._bounds[i]}")
+            if not (self._bounds[i][0] <= gene <= self._bounds[i][1]):
+                raise ValueError(
+                    f"Gene at index {i} = {gene} is out of bounds {self._bounds[i]}"
+                )
 
         return RealAntibody(
             genes=self._genes,
@@ -95,4 +108,6 @@ class RealAntibodyBuilder():
             distance_fn=self._distance_fn,
             cost_fn=self._cost_fn,
         )
+
+
 #

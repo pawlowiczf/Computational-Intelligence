@@ -7,6 +7,7 @@ import numpy as np
 
 from clonalg.problems.problem import Problem
 
+
 def prepare_mesh_grid(
     problem: Problem,
     bounds: tuple[float, float] = (-5.5, 5.5),
@@ -23,11 +24,11 @@ def prepare_mesh_grid(
             Z[i, j] = problem(xy)
 
     return X, Y, Z, x_vals, y_vals
-#
+
 
 def plot_3d_surface(
     problem: Problem,
-    title = None,
+    title=None,
     grid_size: int = 50,
 ):
     X, Y, Z, _, _ = prepare_mesh_grid(problem=problem, grid_size=grid_size)
@@ -47,7 +48,51 @@ def plot_3d_surface(
     fig.colorbar(surf, shrink=0.5, aspect=10)
     plt.tight_layout()
     plt.show()
-#
+
+
+def plot_3d_surface_without_grid(
+    problem: Problem,
+    grid_size: int = 50,
+):
+    X, Y, Z, _, _ = prepare_mesh_grid(problem=problem, grid_size=grid_size)
+
+    fig = go.Figure(
+        data=go.Surface(
+            x=X,
+            y=Y,
+            z=Z,
+            colorscale="Viridis",
+            colorbar=dict(title="f(x, y)", thickness=15, len=0.6),
+        )
+    )
+
+    axis_config = dict(
+        showgrid=False,
+        zeroline=False,
+        showline=False,
+        showticklabels=False,
+        ticks="",
+        title="",
+        showbackground=False,
+        visible=False,
+    )
+
+    fig.update_layout(
+        title=problem.__class__.__name__,
+        width=800,
+        height=700,
+        scene=dict(
+            xaxis=axis_config,
+            yaxis=axis_config,
+            zaxis=axis_config,
+            camera=dict(eye=dict(x=1.5, y=1.5, z=1.0)),  # starting camera angle
+        ),
+        paper_bgcolor="white",
+        margin=dict(l=0, r=0, t=40, b=0),
+    )
+
+    fig.show()
+
 
 def plot_contour_and_paths(
     problem: Problem,
@@ -76,7 +121,18 @@ def plot_contour_and_paths(
         )
     )
 
-    colors = ['red', 'blue', 'green', 'purple', 'orange', 'cyan', 'magenta', 'yellow', 'pink', 'brown']
+    colors = [
+        "red",
+        "blue",
+        "green",
+        "purple",
+        "orange",
+        "cyan",
+        "magenta",
+        "yellow",
+        "pink",
+        "brown",
+    ]
 
     for idx, path in enumerate(paths):
         color_idx = idx % len(colors)
@@ -88,14 +144,17 @@ def plot_contour_and_paths(
                 marker=dict(size=5),
                 line=dict(width=2, color=colors[color_idx]),
                 # name=f"Run {idx+1}"
-                showlegend=False
+                showlegend=False,
             )
         )
 
     fig.update_layout(
-        title=title, xaxis_title="x", yaxis_title="y", width=800, height=700
+        title=title,
+        xaxis_title="x",
+        yaxis_title="y",
+        width=800,
+        height=700,
         # legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     )
 
     fig.show()
-#

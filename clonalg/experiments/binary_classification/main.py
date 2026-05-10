@@ -12,6 +12,7 @@ antigens = [
 
 n_bits = len(antigens[0])
 
+
 # --- factory: random binary antibody ---
 def factory() -> BinaryAntibody:
     genes = np.random.randint(0, 2, size=n_bits)
@@ -21,6 +22,7 @@ def factory() -> BinaryAntibody:
         .with_distance_fn(lambda a, b: np.sum(a != b))
         .build()
     )
+
 
 # --- run CLONALG ---
 clonalg = PatternClonalg(

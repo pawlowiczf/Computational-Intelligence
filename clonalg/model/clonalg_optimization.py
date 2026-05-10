@@ -12,15 +12,16 @@ In a optimization version of Clonalg algorithm, there are a few differences:
 2. The whole Ab population composes the memory set, it is no longer necessary to store a separate memory set.
 """
 
+
 class OptimizationClonalg:
     def __init__(
         self,
-        population_size: int,           # N - whole population is memory (no separate Ab_m)
-        clone_factor: float,            # beta - clone multiplier
-        n_replace: int,                 # d - how many weakest to replace with random
+        population_size: int,  # N - whole population is memory (no separate Ab_m)
+        clone_factor: float,  # beta - clone multiplier
+        n_replace: int,  # d - how many weakest to replace with random
         n_generations: int,
         antibody_factory: Callable[[], Antibody],
-        rho: float = 1.0,               # decay rate: alpha = exp(-rho * f)
+        rho: float = 1.0,  # decay rate: alpha = exp(-rho * f)
         suppression_threshold: float = 0.1,  # sigma_s - min distance between survivors (in the metric defined by Antibody.distance)
         hypermutation_strategy: str = "rank",  # "rank" (scale-invariant, generic) or "affinity" (uses raw affinity, requires well-scaled cost)
     ):
@@ -101,9 +102,15 @@ class OptimizationClonalg:
     @deprecated("Use another method instead")
     def _replace_weakest(self):
         # Population must be sorted descending before calling this
-        self.population[-self.n_replace:] = [
+        self.population[-self.n_replace :] = [
             self.antibody_factory() for _ in range(self.n_replace)
         ]
+
+    def _select_best_clones(self, clone_groups: list[list[Antibody]]) -> None:
+        for i, clones in enumerate(clone_groups):
+            best_clone = max(clones, key=lambda ab: ab.affinity(None))
+            if best_clone.affinity(None) > self.population[i].affinity(None):
+                self.population[i] = best_clone
 
     def _suppress_and_refill(self, sigma_s):
         """
@@ -133,23 +140,20 @@ class OptimizationClonalg:
             survivors.append(self.antibody_factory())
         self.population = survivors
 
-    def run(self) -> list[Antibody]:
+    def run(self, verbose: bool = True) -> list[Antibody]:
         """
         Run the optimization version of CLONALG for a fixed number of generations.
         Each generation applies cloning, hypermutation, selection, and suppression niching
         to drive the population toward multiple optima of the objective function.
         """
-        for _ in tqdm(range(self.n_generations)):
+        for _ in tqdm(range(self.n_generations), disable=not verbose):
             # Clone each Ab N_c times and apply hypermutation
             # (mutation rate inversely proportional to affinity: α = exp(-ρ · f))
             clone_groups = self._clone_and_mutate()
 
             # Select the best clone from each group and replace parent if improved
-            # (each parent competes only with its own clones — no cross-group competition)
-            for i, clones in enumerate(clone_groups):
-                best_clone = max(clones, key=lambda ab: ab.affinity(None))
-                if best_clone.affinity(None) > self.population[i].affinity(None):
-                    self.population[i] = best_clone
+            # (each parent competes only with its own clones - no cross-group competition)
+            self._select_best_clones(clone_groups)
 
             # Sort population by affinity descending (best first)
             # required before suppression, which accepts candidates greedily from the top

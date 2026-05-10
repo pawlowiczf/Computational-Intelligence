@@ -2,17 +2,18 @@ import numpy as np
 from clonalg.antibody.antibody import Antibody
 from typing import Callable
 
+
 class PatternClonalg:
     def __init__(
         self,
-        population_size: int,       # N - total population size (Ab_r + Ab_m)
-        clone_factor: float,        # beta - clone multiplier
-        n_select: int,              # n - how many best to clone each generation
-        n_replace: int,             # d - how many weakest to replace with random
+        population_size: int,  # N - total population size (Ab_r + Ab_m)
+        clone_factor: float,  # beta - clone multiplier
+        n_select: int,  # n - how many best to clone each generation
+        n_replace: int,  # d - how many weakest to replace with random
         n_generations: int,
-        memory_size: int,           # |M| - number of memory cells
+        memory_size: int,  # |M| - number of memory cells
         antibody_factory: Callable[[], Antibody],
-        rho: float = 1.0,           # decay rate: alpha = exp(-rho * f)
+        rho: float = 1.0,  # decay rate: alpha = exp(-rho * f)
     ):
         self.population_size = population_size
         self.clone_factor = clone_factor
@@ -23,8 +24,8 @@ class PatternClonalg:
         self.antibody_factory = antibody_factory
         self.rho = rho
 
-        self.memory: list[Antibody] = []        # Ab_m - memory cells
-        self.population: list[Antibody] = [     # Ab_r - remainder
+        self.memory: list[Antibody] = []  # Ab_m - memory cells
+        self.population: list[Antibody] = [  # Ab_r - remainder
             antibody_factory() for _ in range(population_size)
         ]
 
@@ -82,7 +83,7 @@ class PatternClonalg:
                 # Parent came from Ab_r - compete with worst memory Ab
                 worst_idx = min(
                     range(len(self.memory)),
-                    key=lambda i: self.memory[i].affinity(antigen)
+                    key=lambda i: self.memory[i].affinity(antigen),
                 )
                 if best_affinity > self.memory[worst_idx].affinity(antigen):
                     self.memory[worst_idx] = best_clone
@@ -90,7 +91,7 @@ class PatternClonalg:
     def _replace_weakest(self, antigen: np.ndarray):
         """Step 8: replace d lowest affinity Ab's from Ab_r with new random ones."""
         # Population (Ab_r) must be sorted descending before calling this
-        self.population[-self.n_replace:] = [
+        self.population[-self.n_replace :] = [
             self.antibody_factory() for _ in range(self.n_replace)
         ]
 
@@ -104,7 +105,7 @@ class PatternClonalg:
             mem_tagged = [(ab, i) for i, ab in enumerate(self.memory)]
             tagged = pop_tagged + mem_tagged
             tagged.sort(key=lambda t: t[0].affinity(antigen), reverse=True)
-            selected_tagged = tagged[:self.n_select]
+            selected_tagged = tagged[: self.n_select]
             selected = [ab for ab, _ in selected_tagged]
             memory_indices = [idx for _, idx in selected_tagged]
 
