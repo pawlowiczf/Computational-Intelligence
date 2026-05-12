@@ -52,9 +52,12 @@ def plot_3d_surface(
 
 def plot_3d_surface_without_grid(
     problem: Problem,
+    bounds: tuple[float, float] = (-5.5, 5.5),
     grid_size: int = 50,
 ):
-    X, Y, Z, _, _ = prepare_mesh_grid(problem=problem, grid_size=grid_size)
+    X, Y, Z, _, _ = prepare_mesh_grid(
+        problem=problem, bounds=bounds, grid_size=grid_size
+    )
 
     fig = go.Figure(
         data=go.Surface(
@@ -97,6 +100,7 @@ def plot_3d_surface_without_grid(
 def plot_contour_and_paths(
     problem: Problem,
     paths: list[np.ndarray],
+    bounds: tuple[float, float] = (-5.5, 5.5),
     grid_size: int = 200,
     title: str = "",
 ):
@@ -108,7 +112,9 @@ def plot_contour_and_paths(
         paths: List of numpy arrays; each array is of shape (epochs, 2) containing an optimization trajectory.
         title: Title for the plot.
     """
-    _, _, Z, x_vals, y_vals = prepare_mesh_grid(problem, grid_size=grid_size)
+    _, _, Z, x_vals, y_vals = prepare_mesh_grid(
+        problem, bounds=bounds, grid_size=grid_size
+    )
 
     fig = go.Figure(
         data=go.Contour(

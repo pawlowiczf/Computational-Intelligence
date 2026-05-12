@@ -52,9 +52,6 @@ class PermutationAntibody(Antibody):
         return PermutationAntibodyBuilder()
 
 
-#
-
-
 class PermutationAntibodyBuilder:
     def __init__(self):
         self._genes = None
@@ -62,8 +59,6 @@ class PermutationAntibodyBuilder:
             np.sum(a != b)
         )
         self._cost_fn: Callable[[np.ndarray], float] = None
-
-    #
 
     def with_genes(self, genes: np.ndarray) -> "PermutationAntibodyBuilder":
         self._genes = genes
@@ -90,6 +85,3 @@ class PermutationAntibodyBuilder:
             distance_fn=self._distance_fn,
             cost_fn=self._cost_fn,
         )
-
-
-#

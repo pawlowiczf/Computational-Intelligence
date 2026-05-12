@@ -51,4 +51,33 @@ class Rastrigin(Problem):
         return 2 * x + 2 * np.pi * A * np.sin(2 * np.pi * x)
 
 
-#
+class Ackley(Problem):
+    def __call__(self, x: np.ndarray) -> float:
+        a = 20
+        b = 0.2
+        c = 2 * np.pi
+        n = x.size
+
+        sum_sq = np.sum(x**2)
+        sum_cos = np.sum(np.cos(c * x))
+
+        term1 = -a * np.exp(-b * np.sqrt(sum_sq / n))
+        term2 = -np.exp(sum_cos / n)
+
+        return term1 + term2 + a + np.e
+
+    def grad(self, x: np.ndarray) -> np.ndarray:
+        pass
+
+
+class Griewank(Problem):
+    def __call__(self, x: np.ndarray) -> float:
+        sum_term = np.sum(x**2) / 4000
+
+        i = np.arange(1, x.size + 1)
+        prod_term = np.prod(np.cos(x / np.sqrt(i)))
+
+        return sum_term - prod_term + 1
+
+    def grad(self, x: np.ndarray) -> np.ndarray:
+        pass

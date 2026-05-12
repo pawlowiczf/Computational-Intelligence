@@ -18,7 +18,6 @@ class OptimizationClonalg:
         self,
         population_size: int,  # N - whole population is memory (no separate Ab_m)
         clone_factor: float,  # beta - clone multiplier
-        n_replace: int,  # d - how many weakest to replace with random
         n_generations: int,
         antibody_factory: Callable[[], Antibody],
         rho: float = 1.0,  # decay rate: alpha = exp(-rho * f)
@@ -32,7 +31,6 @@ class OptimizationClonalg:
 
         self.population_size = population_size
         self.clone_factor = clone_factor
-        self.n_replace = n_replace
         self.n_generations = n_generations
         self.antibody_factory = antibody_factory
         self.rho = rho
@@ -99,12 +97,12 @@ class OptimizationClonalg:
             clone_groups.append(matured)
         return clone_groups
 
-    @deprecated("Use another method instead")
-    def _replace_weakest(self):
-        # Population must be sorted descending before calling this
-        self.population[-self.n_replace :] = [
-            self.antibody_factory() for _ in range(self.n_replace)
-        ]
+    # @deprecated("Use another method instead")
+    # def _replace_weakest(self):
+    #     # Population must be sorted descending before calling this
+    #     self.population[-self.n_replace :] = [
+    #         self.antibody_factory() for _ in range(self.n_replace)
+    #     ]
 
     def _select_best_clones(self, clone_groups: list[list[Antibody]]) -> None:
         for i, clones in enumerate(clone_groups):
