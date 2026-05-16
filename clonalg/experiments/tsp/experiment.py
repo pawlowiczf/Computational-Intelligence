@@ -101,9 +101,7 @@ EXPERIMENTS: dict[str, dict[str, list]] = {
 def expand_grid(grid: dict[str, list]) -> list[dict]:
     "Cartesian product of a {param: [values]} grid -> list of {param: value} dicts."
     keys = list(grid.keys())
-    return [
-        dict(zip(keys, values)) for values in itertools.product(*grid.values())
-    ]
+    return [dict(zip(keys, values)) for values in itertools.product(*grid.values())]
 
 
 def load_solutions(filepath: Path) -> dict[str, int]:
@@ -336,7 +334,9 @@ def main() -> None:
                 prob = res.get("problem_name", "_unknown")
                 if prob not in summary_files:
                     (args.output_dir / prob).mkdir(parents=True, exist_ok=True)
-                    summary_files[prob] = (args.output_dir / prob / "summary.jsonl").open("w")
+                    summary_files[prob] = (
+                        args.output_dir / prob / "summary.jsonl"
+                    ).open("w")
                 summary_files[prob].write(json.dumps(res) + "\n")
                 summary_files[prob].flush()
 
