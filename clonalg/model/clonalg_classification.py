@@ -11,7 +11,7 @@ def _train_clonalg_class(args: Tuple) -> Tuple[int, np.ndarray]:
     Executes the 8 steps of the pattern recognition CLONALG algorithm.
     """
     (label, X_class, pop_size, mem_size, clone_factor, 
-     n_select, n_replace, n_gen, rho, bounds) = args
+     n_select, n_replace, n_gen, rho, bounds, init) = args
     
     np.random.seed()
 
@@ -20,10 +20,16 @@ def _train_clonalg_class(args: Tuple) -> Tuple[int, np.ndarray]:
     
     # INITIALIZATION
     # Memory pool (Ab_m): Initialized using Heuristic Initialization (KMeans centroids).
-    km = KMeans(n_clusters=mem_size, n_init=1, max_iter=50)
-    km.fit(X_class)
-    memory = km.cluster_centers_.copy()
-
+    if init == "kmeans":
+        km = KMeans(n_clusters=mem_size, n_init=1, max_iter=50)
+        km.fit(X_class)
+        memory = km.cluster_centers_.copy()
+    elif init == "random":
+        memory = np.random.uniform(bounds[0], bounds[1], (mem_size, dim))
+    elif init == "sample":
+        sampled_indices = np.random.choice(X_class.shape[0], size=mem_size, replace=False)
+        memory = X_class[sampled_indices].copy()
+    
     # Remaining pool (Ab_r): Initialized randomly within defined bounds.
     population = np.random.uniform(bounds[0], bounds[1], (pop_rem_size, dim))
     
@@ -31,6 +37,8 @@ def _train_clonalg_class(args: Tuple) -> Tuple[int, np.ndarray]:
     # Step 4 formula: N_c = round(beta * N / i), where i is the rank.
     ranks = np.arange(1, n_select + 1)
     n_clones_per_rank = np.round(clone_factor * pop_size / ranks).astype(int)
+
+    feature_std = np.maximum(X_class.std(axis=0), (bounds[1] - bounds[0]) * 0.1)
     
     for gen in range(n_gen):
         perm = np.random.permutation(X_class.shape[0])
@@ -67,9 +75,8 @@ def _train_clonalg_class(args: Tuple) -> Tuple[int, np.ndarray]:
             
             # Dynamic Sigma: Standard deviation of the Gaussian noise is scaled by the mutation rate 
             # and the total width of the allowed variable bounds.
-            bound_width = bounds[1] - bounds[0]
-            sigma = clone_rates * bound_width
-            
+            sigma = clone_rates * feature_std
+                    
             # Apply Gaussian mutation
             noise = np.random.normal(0, 1, size=clones.shape)
             matured_clones = clones + (noise * sigma)
@@ -107,6 +114,12 @@ def _train_clonalg_class(args: Tuple) -> Tuple[int, np.ndarray]:
 
 
 class ClassificationClonalg:
+    '''
+    init:
+        - kmeans: Use KMeans centroids for heuristic initialization of the memory pool.
+        - random: Randomly initialize the memory pool within the defined bounds.
+        - sample: Randomly sample initial memory cells from the training data of the class.
+    '''
     def __init__(
         self, 
         n_classes: int,
@@ -117,8 +130,10 @@ class ClassificationClonalg:
         n_generations: int,         # N_gen - predefined maximum number of generations
         memory_size: int,           # m - number of memory cells in Ab_m
         rho: float = 1.0,           # rho - controls the decay of the mutation step size
-        bounds: Tuple[float, float] = (-5.0, 5.0) # Boundary constraints for the shape space
+        bounds: Tuple[float, float] = (-5.0, 5.0), # Boundary constraints for the shape space
+        init: str = "kmeans"   # Whether to use heuristic initialization (KMeans) for memory pool
     ):
+    
         if n_classes <= 0:
             raise ValueError("n_classes must be greater than 0")
         
@@ -134,6 +149,7 @@ class ClassificationClonalg:
         self.memory_size = memory_size
         self.rho = rho
         self.bounds = bounds
+        self.init = init
         
         # Dictionary storing the trained memory matrices (Ab_m) for each class
         self.models: Dict[int, np.ndarray] = {}
@@ -162,7 +178,7 @@ class ClassificationClonalg:
                 jobs.append((
                     label, X_matrix, self.pop_size, self.memory_size, 
                     self.clone_factor, self.n_select, self.n_replace, 
-                    self.n_generations, self.rho, self.bounds
+                    self.n_generations, self.rho, self.bounds, self.init
                 ))
 
         if len(jobs) <= 1:
